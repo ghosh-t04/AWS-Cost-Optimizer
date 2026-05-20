@@ -1,5 +1,6 @@
 import boto3
 import datetime
+
 def get_ec2_instances(region: str = "us-east-1") -> list:
     ec2 = boto3.client("ec2", region_name=region)
     instances = []
@@ -17,6 +18,7 @@ def get_ec2_instances(region: str = "us-east-1") -> list:
                 "service": "EC2",
             })
     return instances
+
 def get_rds_instances(region: str = "us-east-1") -> list:
     rds = boto3.client("rds", region_name=region)
     return [{
@@ -68,6 +70,7 @@ def get_s3_buckets() -> list:
             "service": "S3",
         })
     return buckets
+
 def get_lambda_functions(region: str = "us-east-1") -> list:
     lam = boto3.client("lambda", region_name=region)
     functions = []
@@ -83,6 +86,7 @@ def get_lambda_functions(region: str = "us-east-1") -> list:
                 "service": "Lambda",
             })
     return functions
+
 def get_ecs_clusters(region: str = "us-east-1") -> list:
     ecs = boto3.client("ecs", region_name=region)
     resp = ecs.list_clusters()
@@ -98,6 +102,7 @@ def get_ecs_clusters(region: str = "us-east-1") -> list:
         "active_services": c.get("activeServicesCount", 0),
         "service": "ECS", "region": region
     } for c in details]
+
 def get_elasticache_clusters(region: str = "us-east-1") -> list:
     ec = boto3.client("elasticache", region_name=region)
     return [{
@@ -109,6 +114,7 @@ def get_elasticache_clusters(region: str = "us-east-1") -> list:
         "num_nodes": c.get("NumCacheNodes", 1),
         "service": "ElastiCache", "region": region
     } for c in ec.describe_cache_clusters().get("CacheClusters", [])]
+
 def get_nat_gateways(region: str = "us-east-1") -> list:
     ec2 = boto3.client("ec2", region_name=region)
     return [{

@@ -152,10 +152,17 @@ if cache_key not in st.session_state:
             st.session_state[cache_key] = None
             st.error(f"Could not fetch cost data: {e}")
 cost_data = st.session_state.get(cache_key)
+if cost_data and "error" in cost_data:
+    st.error(f"Could not fetch cost data: {cost_data['error']}")
+    cost_data = None
 if cost_data:
-    total = cost_data["total_cost"]
-    services_count = len(cost_data["by_service"])
-    top_service = cost_data["by_service"][0] if cost_data["by_service"] else {"service": "—", "cost": 0}
+    if cost_data.get("warning"):
+        st.warning(cost_data["warning"])
+    by_service = cost_data.get("by_service", [])
+    daily_trend = cost_data.get("daily_trend", [])
+    total = cost_data.get("total_cost", 0.0)
+    services_count = len(by_service)
+    top_service = by_service[0] if by_service else {"service": "—", "cost": 0}
     with col1:
         st.markdown(f"""
         <div class="metric-card">
@@ -195,7 +202,7 @@ if cost_data:
     with tab1:
         chart_col1, chart_col2 = st.columns([3, 2])
         with chart_col1:
-            df_service = pd.DataFrame(cost_data["by_service"][:15])
+            df_service = pd.DataFrame(by_service[:15])
             if not df_service.empty:
                 st.markdown("#### Top Services")
                 fig_bar = px.bar(
@@ -224,7 +231,7 @@ if cost_data:
                 
         with chart_col2:
             st.markdown("#### Cost Distribution")
-            df_pie = pd.DataFrame(cost_data["by_service"][:10])
+            df_pie = pd.DataFrame(by_service[:10])
             if not df_pie.empty:
                 colors = px.colors.qualitative.Pastel
                 fig_pie = px.pie(
@@ -247,7 +254,7 @@ if cost_data:
 
     with tab2:
         st.markdown(f"#### Cost Trend (Last {period} days)")
-        daily = cost_data.get("daily_trend", [])
+        daily = daily_trend
         if daily:
             df_daily = pd.DataFrame(daily)
             df_daily["date"] = pd.to_datetime(df_daily["date"])

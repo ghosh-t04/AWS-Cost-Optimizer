@@ -1,15 +1,18 @@
-import json
+import json #convert data from string to dictionary
 import os
 import logging
 import cost_explorer, services_inventory, service_actions
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 DEFAULT_REGION = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+
 def lambda_handler(event, context):
     logger.info(f"Received event: {json.dumps(event)}")
     action = event.get("action")
     region = event.get("region", DEFAULT_REGION)
     params = event.get("params", {})
+    
     try:
         body = json.loads(event.get("body", "{}"))
         if not body and "action" in event:
@@ -17,8 +20,8 @@ def lambda_handler(event, context):
         action = body.get("action")
         region = body.get("region", DEFAULT_REGION)
         logger.info(f"Parsed action: {action}, region: {region}")
-        if action == "ping":
-            import boto3
+        if action == "ping": #check whether aws account is connected or not
+            import boto3 
             sts = boto3.client("sts")
             identity = sts.get_caller_identity()
             result = {
@@ -119,7 +122,8 @@ def lambda_handler(event, context):
     except Exception as e:
         logger.error(f"Error handling action: {e}", exc_info=True)
         return _response(500, {"error": str(e)})
-def _response(status_code: int, body: dict) -> dict:
+
+def _response(status_code: int, body: dict) -> dict: #for cors
     return {
         "statusCode": status_code,
         "headers": {

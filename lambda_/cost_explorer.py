@@ -1,15 +1,39 @@
 import boto3
+from botocore.exceptions import ClientError
 from datetime import datetime, timedelta
+def _empty_cost_payload(start_date, end_date, currency: str = "USD", message: str = None) -> dict:
+    payload = {
+        "total_cost": 0.0,
+        "currency": currency,
+        "start_date": str(start_date),
+        "end_date": str(end_date),
+        "by_service": [],
+        "daily_trend": [],
+    }
+    if message:
+        payload["warning"] = message
+    return payload
+
 def get_cost_breakdown(days: int = 30) -> dict:
     ce = boto3.client("ce", region_name="us-east-1")
     end_date = datetime.utcnow().date()
     start_date = end_date - timedelta(days=days)
-    service_resp = ce.get_cost_and_usage(
-        TimePeriod={"Start": str(start_date), "End": str(end_date)},
-        Granularity="MONTHLY",
-        Metrics=["UnblendedCost"],
-        GroupBy=[{"Type": "DIMENSION", "Key": "SERVICE"}],
-    )
+    try:
+        service_resp = ce.get_cost_and_usage(
+            TimePeriod={"Start": str(start_date), "End": str(end_date)},
+            Granularity="MONTHLY",
+            Metrics=["UnblendedCost"],
+            GroupBy=[{"Type": "DIMENSION", "Key": "SERVICE"}],
+        )
+    except ClientError as e:
+        error_code = e.response.get("Error", {}).get("Code")
+        if error_code == "DataUnavailableException":
+            return _empty_cost_payload(
+                start_date=start_date,
+                end_date=end_date,
+                message="Cost Explorer data is not available for the selected time period yet."
+            )
+        raise
     by_service = []
     total_cost = 0.0
     currency = "USD"
@@ -22,15 +46,21 @@ def get_cost_breakdown(days: int = 30) -> dict:
                 total_cost += amount
     by_service.sort(key=lambda x: x["cost"], reverse=True)
     
-    daily_resp = ce.get_cost_and_usage(
-        TimePeriod={"Start": str(start_date), "End": str(end_date)},
-        Granularity="DAILY",
-        Metrics=["UnblendedCost"],
-    )
-    daily_trend = [
-        {"date": r["TimePeriod"]["Start"], "cost": round(float(r["Total"]["UnblendedCost"]["Amount"]), 4)}
-        for r in daily_resp.get("ResultsByTime", [])
-    ]
+    daily_trend = []
+    try:
+        daily_resp = ce.get_cost_and_usage(
+            TimePeriod={"Start": str(start_date), "End": str(end_date)},
+            Granularity="DAILY",
+            Metrics=["UnblendedCost"],
+        )
+        daily_trend = [
+            {"date": r["TimePeriod"]["Start"], "cost": round(float(r["Total"]["UnblendedCost"]["Amount"]), 4)}
+            for r in daily_resp.get("ResultsByTime", [])
+        ]
+    except ClientError as e:
+        error_code = e.response.get("Error", {}).get("Code")
+        if error_code != "DataUnavailableException":
+            raise
     return {
         "total_cost": round(total_cost, 2),
         "currency": currency,
@@ -39,6 +69,7 @@ def get_cost_breakdown(days: int = 30) -> dict:
         "by_service": by_service,
         "daily_trend": daily_trend,
     }
+
 def get_monthly_forecast() -> dict:
     try:
         ce = boto3.client("ce", region_name="us-east-1")

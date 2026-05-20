@@ -11,6 +11,7 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from dashboard.utils.aws_client import get_aws_client
 from config.settings import AWS_REGION
+
 @tool
 def get_aws_cost_summary(days: int = 30) -> str:
     """Fetch AWS cost breakdown for the specified number of days."""
@@ -26,6 +27,7 @@ def get_aws_cost_summary(days: int = 30) -> str:
     except Exception as e:
         return f"Error fetching costs: {str(e)}"
 @tool
+
 def get_ec2_instances(region: str = AWS_REGION) -> str:
     """List EC2 instances in the specified region."""
     try:
@@ -42,6 +44,7 @@ def get_ec2_instances(region: str = AWS_REGION) -> str:
         return "\n".join(lines)
     except Exception as e:
         return f"Error listing EC2: {str(e)}"
+
 @tool
 def get_rds_instances(region: str = AWS_REGION) -> str:
     """List RDS instances in the specified region."""
@@ -61,6 +64,7 @@ def get_rds_instances(region: str = AWS_REGION) -> str:
     except Exception as e:
         return f"Error listing RDS: {str(e)}"
 @tool
+
 def get_s3_buckets() -> str:
     """List all S3 buckets."""
     try:
@@ -78,6 +82,7 @@ def get_s3_buckets() -> str:
     except Exception as e:
         return f"Error listing S3: {str(e)}"
 @tool
+
 def get_lambda_functions(region: str = AWS_REGION) -> str:
     """List Lambda functions in the specified region."""
     try:
@@ -95,6 +100,7 @@ def get_lambda_functions(region: str = AWS_REGION) -> str:
     except Exception as e:
         return f"Error listing Lambda: {str(e)}"
 @tool
+
 def get_nat_gateways(region: str = AWS_REGION) -> str:
     """List NAT Gateways in the specified region."""
     try:
@@ -108,6 +114,7 @@ def get_nat_gateways(region: str = AWS_REGION) -> str:
         return "\n".join(lines)
     except Exception as e:
         return f"Error listing NAT Gateways: {str(e)}"
+
 SYSTEM_PROMPT = """You are CloudWise, an expert AWS Solutions Architect and FinOps specialist.
 Your goal is to help users reduce their AWS costs through actionable, specific recommendations.
 When analyzing costs:
@@ -120,6 +127,7 @@ When analyzing costs:
 7. Group recommendations into: Quick Wins (immediate), Medium Term, and Long Term.
 Always be concise, helpful, and educational. Explain WHY each recommendation saves money.
 Format your final answer clearly with sections and bullet points."""
+
 class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
 TOOLS = [
@@ -130,6 +138,7 @@ TOOLS = [
     get_lambda_functions,
     get_nat_gateways,
 ]
+
 class CostOptimizerAgent:
     def __init__(self, openai_api_key: str, model: str = "gpt-4o"):
         self.llm = ChatOpenAI(

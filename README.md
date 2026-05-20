@@ -1,6 +1,6 @@
 # ☁️ AWS Cost Optimizer
 
-A **production-grade, teachable** AWS cost optimization dashboard built with Python. This project serves as a hands-on tutorial for integrating AWS SDKs, Streamlit, and AI-driven cost analysis into a single, cohesive web application.
+A **production-grade** AWS cost optimization dashboard built with Python. This project serves as a hands-on tutorial for integrating AWS SDKs, Streamlit, and AI-driven cost analysis into a single, cohesive web application.
 
 | Layer | Technology |
 |-------|-----------|
