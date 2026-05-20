@@ -1,6 +1,6 @@
 # ☁️ AWS Cost Optimizer
 
-A **production-grade** AWS cost optimization dashboard built with Python. This project serves as a hands-on tutorial for integrating AWS SDKs, Streamlit, and AI-driven cost analysis into a single, cohesive web application.
+A **production-grade** AWS cost optimization dashboard built with Python. This project integrates AWS SDKs, Streamlit, and AI-driven cost analysis into a single, cohesive web application.
 
 | Layer | Technology |
 |-------|-----------|
@@ -113,7 +113,7 @@ Project -11 AWS Cost/
 
 ## 🤖 How the AI Advisor Works
 
-The AI Advisor isn't just a generic chatbot; it has **tools**. We use LangChain to give GPT-4o the ability to securely query your real AWS environment.
+The AI Advisor isn't just a generic chatbot; it has **tools**. It uses LangChain to give GPT-4o the ability to securely query your real AWS environment.
 
 When you ask, *"How can I save money?"*, the AI runs the following tools invisibly:
 1.  `get_aws_cost_summary`: Reads your recent bill.
@@ -124,7 +124,7 @@ It then synthesizes this actual data into actionable advice.
 
 ---
 
-## ⚠️ Safety Warnings for the Tutorial
+## ⚠️ Warnings
 
 Because this dashboard connects to a real AWS account, the actions on the **Services** tab are live:
 *   **Stop vs Terminate EC2**: Stopping is like shutting down a computer (can be restarted). Terminating deletes it forever.
